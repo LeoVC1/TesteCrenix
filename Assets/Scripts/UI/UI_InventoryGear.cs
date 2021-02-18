@@ -18,6 +18,7 @@ public class UI_InventoryGear : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     private RectTransform m_ParentCanvas;
     private RectTransform m_RectTransform;
     private Vector3 startPosition;
+    private GearSlot currentGearSlot;
 
     private void Start()
     {
@@ -57,18 +58,22 @@ public class UI_InventoryGear : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        m_RectTransform.SetParent(m_StartParent); //Return to original parent
+
         if (CheckWorldCollision()) //If end drag on top of a slot, hide the object
         {
-            m_Image.enabled = false;
-            m_RectTransform.localPosition = startPosition;
-            placeholderImage.enabled = false;
+            HideVisuals();
+
+            if (currentGearSlot)
+            {
+                currentGearSlot.ActivateGear(m_Image.color, this);
+            }
         }
         else //Else, return it to start location
         {
             m_RectTransform.DOLocalMove(startPosition, 0.3f, true).OnComplete(() => placeholderImage.enabled = false);
         }
 
-        m_RectTransform.SetParent(m_StartParent);
     }
 
     /// <summary>
@@ -97,11 +102,34 @@ public class UI_InventoryGear : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         {
             if (mouseHit.collider.CompareTag("GearWorldSlot"))
             {
+                currentGearSlot = mouseHit.collider.GetComponent<GearSlot>();
                 return true;
             }
         }
 
+        currentGearSlot = null;
         return false;
+    }
+
+    /// <summary>
+    /// Shows the visuals of the inventory gear
+    /// </summary>
+    public void ShowVisuals()
+    {
+        m_Image.enabled = true;
+    }
+
+    /// <summary>
+    /// Hide the visuals of the inventory gear, and return it to original position
+    /// </summary>
+    public void HideVisuals()
+    {
+        m_Image.enabled = false;
+        placeholderImage.enabled = false;
+
+        m_RectTransform.DOPause();
+        m_RectTransform.localPosition = startPosition;
+        m_RectTransform.localScale = Vector3.one;
     }
 
 }
