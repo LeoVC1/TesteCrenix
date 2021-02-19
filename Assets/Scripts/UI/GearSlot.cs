@@ -2,20 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.Events;
 
 public class GearSlot : MonoBehaviour
 {
+    private static int _gearActives;
+    private static int GearActives 
+    {
+        get
+        {
+            return _gearActives;
+        }
+        set
+        {
+            _gearActives = value;
+
+            OnGearActivesChange.Invoke(value);
+        }
+    }
+
+    public static IntUnityEvent OnGearActivesChange = new IntUnityEvent();
+
     [SerializeField]
     private SpriteRenderer gearVisual;
+    [SerializeField]
+    private ParticleSystem vfxSmoke;
+    [SerializeField, Tooltip("Negative number rotates to left, positive rotates to right")]
+    private float rotationFactor;
 
     private UI_InventoryGear UI_InventoryGear;
     private Rigidbody2D m_Rigidbody2D;
     private Vector3 startPosition;
+    private bool rotationStatus;
 
     private void Start()
     {
         startPosition = gearVisual.transform.localPosition;
         m_Rigidbody2D = gearVisual.GetComponent<Rigidbody2D>();
+
+        OnGearActivesChange.AddListener(CheckGears);
     }
 
     /// <summary>
@@ -27,13 +52,17 @@ public class GearSlot : MonoBehaviour
     {
         gearVisual.transform.localScale = Vector3.one * 0.8f; //Scale down the image to do an animation later
 
-        gameObject.layer = 3;
+        gameObject.layer = 0;
         gearVisual.color = gearColor;
         gearVisual.enabled = true;
+
+        vfxSmoke.Play();
 
         gearVisual.transform.DOScale(1, 0.4f).SetEase(Ease.OutElastic); //Animate the entrance of the image
 
         UI_InventoryGear = inventoryGear; //Save the reference of the gear of the inventory
+
+        GearActives++;
     }
 
     /// <summary>
@@ -41,9 +70,11 @@ public class GearSlot : MonoBehaviour
     /// </summary>
     private void DeactivateGear()
     {
-        gameObject.layer = 0;
+        gameObject.layer = 8;
         gearVisual.enabled = false;
         UI_InventoryGear = null;
+
+        GearActives--;
     }
 
     public void OnMouseDown()
@@ -54,11 +85,11 @@ public class GearSlot : MonoBehaviour
             m_Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation; //Disable the freeze position of the Rigidbody
             m_Rigidbody2D.gravityScale = Random.Range(2, 3.5f); //Random gravity to make more organic
 
-            StartCoroutine(FallDelay());
+            StartCoroutine(OnDeactivate());
         }
     }
 
-    private IEnumerator FallDelay()
+    private IEnumerator OnDeactivate()
     {
         while(gearVisual.transform.position.y > -2.45f)
         {
@@ -71,5 +102,24 @@ public class GearSlot : MonoBehaviour
 
         m_Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
         m_Rigidbody2D.transform.localPosition = startPosition;
+    }
+
+    /// <summary>
+    /// Check the variable GearActives and set rotationStatus based on it
+    /// </summary>
+    private void CheckGears(int gearActives)
+    {
+        if (gearActives == 5)
+            rotationStatus = true;
+        else
+            rotationStatus = false;
+    }
+
+    private void Update()
+    {
+        if (rotationStatus)
+        {
+            transform.Rotate(Vector3.forward * Time.deltaTime * rotationFactor);
+        }
     }
 }

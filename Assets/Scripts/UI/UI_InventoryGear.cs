@@ -7,7 +7,7 @@ using DG.Tweening;
 
 public class UI_InventoryGear : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [SerializeField]
+    [SerializeField, Tooltip("World Gear Slot Layer, used to filter collision")]
     private LayerMask layerMask;
     [SerializeField]
     private Image placeholderImage;

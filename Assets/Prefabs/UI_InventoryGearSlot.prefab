@@ -163,7 +163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 256
   placeholderImage: {fileID: 9034681692504295363}
 --- !u!1 &7826202310650380596
 GameObject:
