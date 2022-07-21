@@ -1,3 +1,3 @@
 # TesteCrenix
-Jogo desenvolvido utilizando a Unity Engine para o teste de programação da empresa Crenix Games!
-Versão WebGL para jogar: https://leovc1.github.io/TesteCrenix/index.html
+Game made with Unity as a test forCrenix Games!
+You can play it here: https://leovc1.github.io/TesteCrenix/index.html
